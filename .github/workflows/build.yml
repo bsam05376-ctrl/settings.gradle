@@ -15,7 +15,7 @@ jobs:
       - name: Setup all Android files cleanly
         run: |
           mkdir -p /tmp/fix_src
-          find . -maxdepth 15 -type f -name "index.html" -exec cp {} /tmp/fix_src/index.html \;
+          find . -type f -name "index.html" -exec cp {} /tmp/fix_src/index.html \;
           if [ ! -f /tmp/fix_src/index.html ]; then echo "ERROR: index.html not found"; exit 1; fi
           rm -rf app/src/main
           mkdir -p app/src/main/java/com/debtsapp/ledger app/src/main/assets app/src/main/res/xml
