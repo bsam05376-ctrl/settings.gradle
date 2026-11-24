@@ -16,7 +16,7 @@ jobs:
         run: |
           mkdir -p /tmp/fix_src
           find . -type f -name "index.html" -exec cp {} /tmp/fix_src/index.html \;
-          find . -not -path './.git/*' -type f -iname "icon.png" -exec cp {} /tmp/fix_src/icon.png \;
+          find . -not -path './.git/*' -not -path './app/build/*' -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} /tmp/fix_src/raw_icon \;
           if [ ! -f /tmp/fix_src/index.html ]; then echo "ERROR: index.html not found"; exit 1; fi
           rm -rf app/src/main
           mkdir -p app/src/main/java/com/debtsapp/ledger app/src/main/assets app/src/main/res/xml app/src/main/res/drawable app/src/main/res/mipmap-anydpi-v24 app/src/main/res/mipmap-anydpi-v26
@@ -45,21 +45,6 @@ jobs:
               <path
                   android:fillColor="#FFFFFF"
                   android:pathData="M36,24H72A6,6 0 0,1 78,30V78A6,6 0 0,1 72,84H36A6,6 0 0,1 30,78V30A6,6 0 0,1 36,24Z" />
-              <path
-                  android:fillColor="#A7F3D0"
-                  android:pathData="M38,31H70A2,2 0 0,1 72,33V37A2,2 0 0,1 70,39H38A2,2 0 0,1 36,37V33A2,2 0 0,1 38,31Z" />
-              <path
-                  android:fillColor="#0D6A57"
-                  android:pathData="M37,46H65V50H37Z M37,55H59V59H37Z M37,64H54V68H37Z" />
-              <path
-                  android:fillColor="#10B981"
-                  android:pathData="M68,57A11,11 0 1,0 68,79A11,11 0 1,0 68,57Z" />
-              <path
-                  android:strokeColor="#FFFFFF"
-                  android:strokeWidth="2.8"
-                  android:strokeLineCap="round"
-                  android:strokeLineJoin="round"
-                  android:pathData="M63,68L66.5,71.5L73.5,64.5" />
           </vector>
           EOF
 
@@ -79,7 +64,12 @@ jobs:
           </adaptive-icon>
           EOF
 
-          if [ -f /tmp/fix_src/icon.png ]; then rm -rf app/src/main/res/mipmap-anydpi* && mkdir -p app/src/main/res/mipmap-xxxhdpi && cp /tmp/fix_src/icon.png app/src/main/res/mipmap-xxxhdpi/ic_launcher.png; fi
+          if [ -f /tmp/fix_src/raw_icon ]; then
+            rm -rf app/src/main/res/mipmap-anydpi*
+            mkdir -p app/src/main/res/mipmap-xxxhdpi app/src/main/res/mipmap-xxhdpi app/src/main/res/mipmap-xhdpi
+            python3 -c "import PIL" 2>/dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq python3-pil)
+            python3 -c "from PIL import Image; im = Image.open('/tmp/fix_src/raw_icon').convert('RGBA'); im.resize((192,192), Image.LANCZOS).save('app/src/main/res/mipmap-xxxhdpi/ic_launcher.png', 'PNG'); im.resize((144,144), Image.LANCZOS).save('app/src/main/res/mipmap-xxhdpi/ic_launcher.png', 'PNG'); im.resize((96,96), Image.LANCZOS).save('app/src/main/res/mipmap-xhdpi/ic_launcher.png', 'PNG')"
+          fi
 
           cat << 'EOF' > app/src/main/res/xml/file_paths.xml
           <?xml version="1.0" encoding="utf-8"?>
