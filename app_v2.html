@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>دفتر الديون</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --primary: #0d6a57;
+      --primary-dark: #095041;
+      --bg: #f3f5f7;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --danger: #b91c1c;
+      --danger-bg: #fdecec;
+      --success: #047857;
+      --success-bg: #ecfdf5;
+      --border: #e5e7eb;
+    }
+
+    * { box-sizing: border-box; font-family: 'Cairo', Tahoma, Arial, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 80px; }
+
+    .topbar {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 14px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .topbar-inner {
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: #fff; flex-shrink: 0; }
+    .brand h1 { margin: 0; font-size: 16px; font-weight: 800; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand small { font-size: 11px; opacity: 0.9; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .container { max-width: 1100px; margin: 14px auto; padding: 0 12px; }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      background: #fff;
+      padding: 5px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .tab-btn {
+      border: none;
+      background: transparent;
+      padding: 9px 4px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .tab-btn.active { background: var(--primary); color: #fff; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+    }
+    .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .stat-value { font-size: 18px; font-weight: 800; margin-top: 4px; }
+    .text-danger { color: var(--danger); }
+    .text-success { color: var(--success); }
+
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .card-title { margin: 0; font-size: 16px; font-weight: 800; }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: 0.15s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-outline { background: #fff; border: 1px solid var(--border); color: var(--text); }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+    .form-group label { font-size: 13px; font-weight: 700; color: #374151; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: #fff;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+
+    .input-with-btn { display: flex; gap: 8px; align-items: stretch; }
+    .input-with-btn input { flex: 1; min-width: 0; }
+
+    .type-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .type-opt {
+      padding: 12px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      text-align: center;
+      font-weight: 800;
+      cursor: pointer;
+      background: #fff;
+      font-size: 14px;
+    }
+    .type-opt.active-debit { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
+    .type-opt.active-credit { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+
+    .customer-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .customer-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .customer-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .customer-name { font-size: 16px; font-weight: 800; margin: 0; }
+    .badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 99px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-weight: 700;
+    }
+    .balance-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .bal-chip {
+      font-size: 13px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: #f3f4f6;
+    }
+    .bal-chip.debit { background: var(--danger-bg); color: var(--danger); }
+    .bal-chip.credit { background: var(--success-bg); color: var(--success); }
+
+    .table-wrap { overflow-x: auto; }
+    table.hist-table { width: 100%; border-collapse: collapse; min-width: 620px; }
+    .hist-table th, .hist-table td { padding: 10px 8px; text-align: right; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .hist-table th { background: #f9fafb; color: var(--muted); font-weight: 700; }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 100;
+      padding: 10px;
+      overflow-y: auto;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 480px;
+      width: 100%;
+      margin: 16px auto;
+      padding: 14px;
+      position: relative;
+    }
+
+    .setup-hero {
+      background: linear-gradient(135deg, #0d6a57, #095041);
+      color: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      text-align: center;
+    }
+    .setup-hero h2 { margin: 0 0 6px; font-size: 19px; font-weight: 800; }
+    .setup-hero p { margin: 0; font-size: 13px; opacity: 0.92; }
+    .logo-preview-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      border: 1px dashed #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #f9fafb;
+      color: var(--muted);
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .logo-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* CLASSIC YEMENI VOUCHER PAPER DESIGN */
+    .voucher-paper {
+      background: #ffffff;
+      color: #111827;
+      padding: 14px 12px 10px;
+      border: 1px solid #d1d5db;
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      font-family: Tahoma, 'Cairo', Arial, sans-serif;
+    }
+    .vp-header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: start;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .vp-col-right {
+      text-align: right;
+      color: #1e3a8a;
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+    .vp-col-center {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    .vp-logo {
+      width: 72px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .vp-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .vp-logo-fallback {
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      background: #1e3a8a;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vp-badge {
+      border: 1px solid #6b7280;
+      padding: 2px 18px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #1e3a8a;
+      background: #fff;
+      white-space: nowrap;
+    }
+    .vp-col-left {
+      text-align: left;
+      direction: ltr;
+      color: #1e3a8a;
+      font-size: 10.5px;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    table.vp-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #6b7280;
+      font-size: 12px;
+    }
+    .vp-table td {
+      border: 1px solid #6b7280;
+      padding: 6px 8px;
+      text-align: center;
+      font-weight: 700;
+    }
+    .vp-top-bar td {
+      background: #d1d5db;
+      color: #1e3a8a;
+      font-style: italic;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 6px 8px;
+    }
+    .vp-cust-name {
+      color: #1e3a8a;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .vp-col-head td {
+      color: #1e3a8a;
+      font-weight: 800;
+      font-size: 12px;
+    }
+    .vp-amt-debit {
+      color: #b91c1c;
+      font-weight: 800;
+      font-size: 14px;
+      direction: ltr;
+    }
+    .vp-amt-credit {
+      color: #047857;
+      font-weight: 800;
+      font-size: 14px;
+      direction: ltr;
+    }
+    .vp-text-right {
+      text-align: right !important;
+      font-size: 11.5px;
+      line-height: 1.5;
+    }
+
+    .vp-footer {
+      margin-top: 26px;
+      border-top: 1px solid #d1d5db;
+      padding-top: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #374151;
+    }
+    .vp-footer span { text-decoration: underline; }
+
+    .caption-preview {
+      margin-top: 12px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      white-space: pre-line;
+      line-height: 1.6;
+    }
+
+    .status-toast {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      display: none;
+    }
+    .status-toast.info { display: block; background: #eff6ff; color: #1d4ed8; }
+    .status-toast.ok { display: block; background: #ecfdf5; color: #047857; }
+    .status-toast.err { display: block; background: #fef2f2; color: #b91c1c; }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .ltr { direction: ltr; display: inline-block; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img id="topLogo" src="" alt="" style="display:none;" />
+        <div style="min-width:0;">
+          <h1 id="topStoreName">دفتر الديون</h1>
+          <small id="topStoreSub">سجل متجرك للبدء</small>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="flex-shrink:0;" onclick="openTab('txTab')">+ قيد عملية</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="customersTab" onclick="openTab('customersTab')">العملاء</button>
+      <button class="tab-btn" data-tab="txTab" onclick="openTab('txTab')">له / عليه</button>
+      <button class="tab-btn" data-tab="historyTab" onclick="openTab('historyTab')">السجل</button>
+      <button class="tab-btn" data-tab="settingsTab" onclick="openTab('settingsTab')">الإعدادات</button>
+    </div>
+
+    <section id="customersTab" class="section active">
+      <div class="stats-grid" id="statsGrid"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">قائمة العملاء</h2>
+          <button class="btn btn-primary btn-sm" onclick="toggleAddCustomer()">+ إضافة عميل جديد</button>
+        </div>
+
+        <div id="addCustomerBox" style="display:none; background:#f9fafb; padding:14px; border-radius:12px; border:1px solid var(--border); margin-bottom:14px;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>اسم العميل *</label>
+              <input type="text" id="custName" placeholder="مثال: عصام عبدالرحيم" />
+            </div>
+            <div class="form-group">
+              <label>رقم الهاتف (أو اختر من جهات الاتصال) *</label>
+              <div class="input-with-btn">
+                <input type="tel" id="custPhone" placeholder="مثال: 77xxxxxxx" />
+                <button type="button" class="btn btn-primary btn-sm" style="white-space:nowrap; padding:0 12px;" onclick="pickContactForCustomer()">
+                  📇 جهات الاتصال
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>التصنيف</label>
+              <select id="custCategory">
+                <option value="عملاء">عملاء</option>
+                <option value="موردين">موردين</option>
+                <option value="عام">عام</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-primary" onclick="saveCustomer()">حفظ العميل</button>
+            <button class="btn btn-outline" onclick="toggleAddCustomer()">إلغاء</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <input type="text" id="searchCust" placeholder="ابحث باسم العميل أو رقم الهاتف..." oninput="renderCustomers()" />
+        </div>
+
+        <div class="customer-list" id="customerList"></div>
+      </div>
+    </section>
+
+    <section id="txTab" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">تسجيل سند عملية جديدة</h2>
+        </div>
+
+        <div class="type-switch">
+          <div id="btnTypeDebit" class="type-opt active-debit" onclick="setTxType('debit')">سند صرف — عليه (دين)</div>
+          <div id="btnTypeCredit" class="type-opt" onclick="setTxType('credit')">سند قبض — له (سداد)</div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>العميل *</label>
+            <select id="txCustomer"></select>
+          </div>
+          <div class="form-group">
+            <label>المبلغ *</label>
+            <input type="number" id="txAmount" min="0" step="any" placeholder="مثال: 5000" />
+          </div>
+          <div class="form-group">
+            <label>العملة</label>
+            <select id="txCurrency">
+              <option value="يمني">يمني</option>
+              <option value="محلي">محلي</option>
+              <option value="سعودي">سعودي</option>
+              <option value="دولار">دولار</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>التاريخ والوقت</label>
+            <input type="datetime-local" id="txDate" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>التفاصيل (وذلك مقابل)</label>
+          <input type="text" id="txDetails" placeholder="مثال: رصيد على تطبيق / دفعة نقدية (اختياري)" />
+        </div>
+
+        <button class="btn btn-primary" style="width:100%; padding:14px; font-size:16px;" onclick="saveTransaction()">
+          حفظ العملية وإرسال السند للواتساب
+        </button>
+      </div>
+    </section>
+
+    <section id="historyTab" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">سجل العمليات</h2>
+          <select id="filterCustHistory" style="max-width:220px;" onchange="renderHistory()">
+            <option value="">كل العملاء</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table class="hist-table">
+            <thead>
+              <tr>
+                <th>رقم السند</th>
+                <th>العميل</th>
+                <th>النوع</th>
+                <th>المبلغ</th>
+                <th>التفاصيل</th>
+                <th>الرصيد بعد</th>
+                <th>التاريخ</th>
+                <th>إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="settingsTab" class="section">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">1. بيانات متجرك (تظهر أعلى ورقة السند)</h2>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>اسم المتجر / المركز (يمين السند)</label>
+            <input type="text" id="setStoreName" placeholder="اكتب اسم متجرك بالعربي" />
+          </div>
+          <div class="form-group">
+            <label>الاسم الإنجليزي أو العنوان (يسار السند)</label>
+            <input type="text" id="setStoreAddress" placeholder="مثال: Abu Yazan Store" />
+          </div>
+          <div class="form-group">
+            <label>رقم هاتف المتجر</label>
+            <input type="text" id="setStorePhone" placeholder="مثال: 77xxxxxxx" />
+          </div>
+          <div class="form-group">
+            <label>مفتاح الدولة الافتراضي</label>
+            <input type="text" id="setCountryCode" placeholder="967" />
+          </div>
+          <div class="form-group">
+            <label>شعار المتجر (وسط السند)</label>
+            <input type="file" accept="image/*" onchange="handleLogoUpload(event)" />
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveSettings()">حفظ بيانات المتجر</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">2. إعدادات الإرسال عبر الواتساب</h2>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>فتح الواتساب تلقائياً فور حفظ العملية</label>
+            <select id="setApkAutoOpenWa">
+              <option value="1">مفعل (يفتح محادثة العميل بالسند فوراً)</option>
+              <option value="0">معطل (عرض معاينة السند أولاً)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>تطبيق الواتساب المفضل</label>
+            <select id="setWaAppPackage">
+              <option value="auto">تلقائي</option>
+              <option value="com.whatsapp">واتساب العادي (WhatsApp)</option>
+              <option value="com.whatsapp.w4b">واتساب الأعمال (WhatsApp Business)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveSettings()">حفظ إعدادات الواتساب</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">3. النسخ الاحتياطي ونقل البيانات</h2>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-outline" onclick="exportBackup()">تصدير نسخة احتياطية (JSON)</button>
+          <label class="btn btn-outline" style="cursor:pointer;">
+            استيراد نسخة احتياطية
+            <input type="file" accept=".json" style="display:none;" onchange="importBackup(event)" />
+          </label>
+          <button class="btn btn-danger" onclick="clearAllData()">مسح جميع البيانات</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- FIRST-TIME STORE REGISTRATION MODAL -->
+  <div id="setupModal" class="modal-backdrop" style="z-index:200;">
+    <div class="modal-box">
+      <div class="setup-hero">
+        <h2>مرحباً بك في دفتر الديون</h2>
+        <p>سجّل بيانات متجرك الخاص مرة واحدة لتظهر في سندات الصرف والقبض الخاصة بعملائك</p>
+      </div>
+
+      <div class="form-group">
+        <label>اسم متجرك / محلك التجاري *</label>
+        <input type="text" id="setupStoreName" placeholder="مثال: مركز النور التجاري" />
+      </div>
+
+      <div class="form-group">
+        <label>رقم هاتف المتجر *</label>
+        <input type="tel" id="setupStorePhone" placeholder="مثال: 77xxxxxxx" />
+      </div>
+
+      <div class="form-group">
+        <label>الاسم الإنجليزي أو العنوان (يسار السند - اختياري)</label>
+        <input type="text" id="setupStoreAddress" placeholder="مثال: Al-Noor Center" />
+      </div>
+
+      <div class="form-group">
+        <label>مفتاح الدولة للواتساب</label>
+        <input type="text" id="setupCountryCode" value="967" placeholder="967" />
+      </div>
+
+      <div class="form-group">
+        <label>شعار المتجر (اختياري)</label>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="logo-preview-box" id="setupLogoPreview">بدون شعار</div>
+          <input type="file" accept="image/*" onchange="handleLogoUpload(event, 'setupLogoPreview')" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%; padding:14px; font-size:16px; margin-top:8px;" onclick="saveInitialSetup()">
+        حفظ بيانات المتجر والبدء
+      </button>
+    </div>
+  </div>
+
+  <!-- RECEIPT VOUCHER MODAL -->
+  <div id="receiptModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <strong style="font-size:15px;">معاينة السند وإرساله</strong>
+        <button class="btn btn-outline btn-sm" onclick="closeReceiptModal()">إغلاق</button>
+      </div>
+
+      <!-- EXACT CLASSIC VOUCHER PAPER -->
+      <div id="receiptCapture" class="voucher-paper">
+        <div class="vp-header">
+          <div class="vp-col-right">
+            <div id="rcStoreName"></div>
+            <div id="rcStorePhone"></div>
+          </div>
+
+          <div class="vp-col-center">
+            <div class="vp-logo" id="rcLogoBox"></div>
+            <div class="vp-badge" id="rcVoucherTitle">سـنـد صـرف</div>
+          </div>
+
+          <div class="vp-col-left">
+            <div id="rcStoreAddress"></div>
+            <div id="rcStorePhoneLeft"></div>
+          </div>
+        </div>
+
+        <table class="vp-table">
+          <tr class="vp-top-bar">
+            <td colspan="2">رقم السند : <span id="rcNum"></span></td>
+            <td colspan="2">التاريخ : <span id="rcDate" class="ltr"></span></td>
+          </tr>
+          <tr>
+            <td style="width:16%;">الأخ</td>
+            <td colspan="2" class="vp-cust-name" id="rcCustName"></td>
+            <td style="width:20%;">المحترم</td>
+          </tr>
+          <tr class="vp-col-head">
+            <td colspan="2" id="rcTypeHeader">عليكم مبلغ</td>
+            <td colspan="2">عملة الحساب</td>
+          </tr>
+          <tr>
+            <td colspan="2" id="rcAmountVal" class="vp-amt-debit"></td>
+            <td colspan="2" id="rcCurrencyVal"></td>
+          </tr>
+          <tr>
+            <td colspan="4" class="vp-text-right">
+              المبلغ كتابة / <span id="rcAmountWords"></span>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" class="vp-text-right">
+              وذلك مقابل / <span id="rcDetails"></span>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" class="vp-text-right" style="background:#f9fafb;">
+              الرصيد بعد العملية / <span id="rcBalanceAfter"></span>
+            </td>
+          </tr>
+        </table>
+
+        <div class="vp-footer">
+          <span>تاريخ الطباعة</span>
+          <span>1 / 1</span>
+          <span id="rcPrintDate" class="ltr"></span>
+        </div>
+      </div>
+
+      <div id="captionPreview" class="caption-preview"></div>
+      <div id="waStatusToast" class="status-toast"></div>
+
+      <div class="modal-actions">
+        <button class="btn btn-success" style="grid-column:1/-1; padding:13px;" onclick="sendDirectToWhatsApp()">
+          إرسال مباشر لمحادثة العميل في واتساب
+        </button>
+        <button class="btn btn-outline" onclick="downloadReceiptImage()">حفظ الصورة (PNG)</button>
+        <button class="btn btn-outline" onclick="copyCaptionText()">نسخ النص</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const STORAGE_KEY = 'debt_ledger_app_v1';
+
+  let state = {
+    settings: {
+      isSetupDone: false,
+      storeName: '',
+      storePhone: '',
+      storeAddress: '',
+      countryCode: '967',
+      logoDataUrl: '',
+      apkAutoOpenWa: '1',
+      waAppPackage: 'auto'
+    },
+    customers: [],
+    transactions: [],
+    lastSeq: 0
+  };
+
+  let currentTxType = 'debit';
+  let activeReceiptTxId = null;
+
+  function esc(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // Arabic Number-to-Words (التفقيط)
+  function arabicUnder1000(n) {
+    const ones = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
+    const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+    const tens = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+    const hundreds = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+
+    let parts = [];
+    const h = Math.floor(n / 100);
+    const rem = n % 100;
+    if (h > 0) parts.push(hundreds[h]);
+    if (rem >= 10 && rem <= 19) {
+      parts.push(teens[rem - 10]);
+    } else {
+      const o = rem % 10;
+      const t = Math.floor(rem / 10);
+      if (o > 0) parts.push(ones[o]);
+      if (t > 1) parts.push(tens[t]);
+    }
+    return parts.join(' و');
+  }
+
+  function arabicNumberToWords(num, currency) {
+    const cur = currency || 'يمني';
+    const val = Number(num) || 0;
+    if (val === 0) return `صفر ${cur} فقط لاغير`;
+
+    const intPart = Math.floor(val);
+    const decPart = Math.round((val - intPart) * 100);
+    let words = [];
+
+    const millions = Math.floor(intPart / 1000000);
+    const thousands = Math.floor((intPart % 1000000) / 1000);
+    const rest = intPart % 1000;
+
+    if (millions > 0) {
+      if (millions === 1) words.push('مليون');
+      else if (millions === 2) words.push('مليونان');
+      else if (millions >= 3 && millions <= 10) words.push(`${arabicUnder1000(millions)} ملايين`);
+      else words.push(`${arabicUnder1000(millions)} مليون`);
+    }
+
+    if (thousands > 0) {
+      if (thousands === 1) words.push('ألف');
+      else if (thousands === 2) words.push('ألفان');
+      else if (thousands >= 3 && thousands <= 10) words.push(`${arabicUnder1000(thousands)} آلاف`);
+      else words.push(`${arabicUnder1000(thousands)} ألف`);
+    }
+
+    if (rest > 0) {
+      words.push(arabicUnder1000(rest));
+    }
+
+    let result = words.join(' و');
+    if (decPart > 0) {
+      result += (result ? ' و' : '') + `${arabicUnder1000(decPart)} جزء`;
+    }
+    return `${result} ${cur} فقط لاغير`;
+  }
+
+  function loadState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        state = {
+          settings: { ...state.settings, ...(parsed.settings || {}) },
+          customers: Array.isArray(parsed.customers) ? parsed.customers : [],
+          transactions: Array.isArray(parsed.transactions) ? parsed.transactions : [],
+          lastSeq: Number(parsed.lastSeq || 0)
+        };
+      }
+    } catch (e) { console.error(e); }
+    recalculateAll();
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  window.handleAndroidBack = function() {
+    const receiptModal = document.getElementById('receiptModal');
+    if (receiptModal.classList.contains('open')) {
+      closeReceiptModal();
+      return true;
+    }
+    const activeTab = document.querySelector('.section.active');
+    if (activeTab && activeTab.id !== 'customersTab') {
+      openTab('customersTab');
+      return true;
+    }
+    return false;
+  };
+
+  function checkInitialSetup() {
+    if (!state.settings.isSetupDone || !state.settings.storeName) {
+      document.getElementById('setupStoreName').value = state.settings.storeName || '';
+      document.getElementById('setupStorePhone').value = state.settings.storePhone || '';
+      document.getElementById('setupStoreAddress').value = state.settings.storeAddress || '';
+      document.getElementById('setupCountryCode').value = state.settings.countryCode || '967';
+      if (state.settings.logoDataUrl) {
+        document.getElementById('setupLogoPreview').innerHTML = `<img src="${state.settings.logoDataUrl}" alt="logo" />`;
+      }
+      document.getElementById('setupModal').classList.add('open');
+    }
+  }
+
+  function saveInitialSetup() {
+    const name = document.getElementById('setupStoreName').value.trim();
+    const phone = document.getElementById('setupStorePhone').value.trim();
+    const address = document.getElementById('setupStoreAddress').value.trim();
+    const cc = document.getElementById('setupCountryCode').value.trim() || '967';
+
+    if (!name || !phone) {
+      alert('الرجاء إدخال اسم المتجر ورقم الهاتف للمتابعة');
+      return;
+    }
+
+    state.settings.storeName = name;
+    state.settings.storePhone = phone;
+    state.settings.storeAddress = address;
+    state.settings.countryCode = cc;
+    state.settings.isSetupDone = true;
+
+    saveState();
+    populateSettingsForm();
+    renderAll();
+    document.getElementById('setupModal').classList.remove('open');
+  }
+
+  window.onNativeContactPicked = function(name, phone) {
+    if (phone) {
+      document.getElementById('custPhone').value = String(phone).replace(/[\s\-\(\)]/g, '');
+    }
+    if (name && !document.getElementById('custName').value.trim()) {
+      document.getElementById('custName').value = name;
+    }
+  };
+
+  async function pickContactForCustomer() {
+    if (window.AndroidBridge && typeof window.AndroidBridge.pickContact === 'function') {
+      window.AndroidBridge.pickContact();
+      return;
+    }
+    if (!window.isSecureContext || !('contacts' in navigator && 'ContactsManager' in window)) {
+      alert('الرجاء إدخال رقم الهاتف يدوياً.');
+      return;
+    }
+    try {
+      const contacts = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+      if (contacts && contacts.length > 0) {
+        const picked = contacts[0];
+        window.onNativeContactPicked(
+          picked.name && picked.name[0] ? picked.name[0] : '',
+          picked.tel && picked.tel[0] ? picked.tel[0] : ''
+        );
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') alert('تعذر فتح جهات الاتصال');
+    }
+  }
+
+  function recalculateAll() {
+    const sorted = [...state.transactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const map = {};
+
+    sorted.forEach(tx => {
+      if (!map[tx.customerId]) map[tx.customerId] = {};
+      const cur = tx.currency || 'يمني';
+      if (typeof map[tx.customerId][cur] !== 'number') map[tx.customerId][cur] = 0;
+
+      const amt = Number(tx.amount) || 0;
+      map[tx.customerId][cur] += (tx.type === 'debit' ? amt : -amt);
+      tx.balanceAfter = map[tx.customerId][cur];
+    });
+
+    state.customers.forEach(c => {
+      c.balances = map[c.id] || {};
+    });
+  }
+
+  function formatNumber(n) {
+    const val = Math.round((Number(n) || 0) * 100) / 100;
+    return val.toLocaleString('en-US');
+  }
+
+  function formatVoucherDate(isoStr) {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return isoStr;
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}-${mm}-${yyyy}`;
+  }
+
+  function formatPrintDate(isoStr) {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return isoStr;
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function formatDateTime(isoStr) {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return isoStr;
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    let hours = d.getHours();
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    const hh = String(hours).padStart(2, '0');
+    return `${yyyy}/${mm}/${dd} — ${hh}:${mins} ${ampm}`;
+  }
+
+  function normalizePhone(phone) {
+    let p = String(phone || '').replace(/[^\d]/g, '');
+    if (p.startsWith('00')) p = p.slice(2);
+    if (p.startsWith('0')) p = p.slice(1);
+    const cc = String(state.settings.countryCode || '967').replace(/[^\d]/g, '');
+    if (cc && !p.startsWith(cc) && p.length <= 9) {
+      p = cc + p;
+    }
+    return p;
+  }
+
+  function openTab(tabId) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    const btn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+    if (btn) btn.classList.add('active');
+
+    if (tabId === 'txTab') setDefaultTxDate();
+  }
+
+  function setDefaultTxDate() {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const localIso = new Date(now - offset).toISOString().slice(0, 16);
+    const input = document.getElementById('txDate');
+    if (!input.value) input.value = localIso;
+  }
+
+  function toggleAddCustomer() {
+    const box = document.getElementById('addCustomerBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function saveCustomer() {
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const category = document.getElementById('custCategory').value;
+
+    if (!name || !phone) {
+      alert('الرجاء إدخال اسم العميل ورقم الهاتف');
+      return;
+    }
+
+    state.customers.push({
+      id: 'c_' + Date.now(),
+      name,
+      phone,
+      category,
+      balances: {}
+    });
+    saveState();
+
+    document.getElementById('custName').value = '';
+    document.getElementById('custPhone').value = '';
+    toggleAddCustomer();
+    renderAll();
+  }
+
+  function setTxType(type) {
+    currentTxType = type;
+    document.getElementById('btnTypeDebit').className = 'type-opt' + (type === 'debit' ? ' active-debit' : '');
+    document.getElementById('btnTypeCredit').className = 'type-opt' + (type === 'credit' ? ' active-credit' : '');
+  }
+
+  function openQuickTx(customerId, type) {
+    openTab('txTab');
+    document.getElementById('txCustomer').value = customerId;
+    setTxType(type);
+    document.getElementById('txAmount').focus();
+  }
+
+  function generateReceiptNo() {
+    state.lastSeq += 1;
+    return String(43000 + state.lastSeq);
+  }
+
+  async function saveTransaction() {
+    const customerId = document.getElementById('txCustomer').value;
+    const amount = parseFloat(document.getElementById('txAmount').value);
+    const currency = document.getElementById('txCurrency').value;
+    let details = document.getElementById('txDetails').value.trim();
+    const dateVal = document.getElementById('txDate').value;
+
+    if (!customerId) {
+      alert('الرجاء إضافة/اختيار عميل أولاً');
+      return;
+    }
+    if (!amount || amount <= 0) {
+      alert('الرجاء إدخال مبلغ صحيح أكبر من صفر');
+      return;
+    }
+    if (!details) {
+      details = currentTxType === 'debit' ? 'رصيد عليكم' : 'دفعة وصل منكم';
+    }
+
+    const isoDate = dateVal ? new Date(dateVal).toISOString() : new Date().toISOString();
+    const tx = {
+      id: 't_' + Date.now(),
+      receiptNo: generateReceiptNo(),
+      customerId,
+      type: currentTxType,
+      amount,
+      currency,
+      details,
+      date: isoDate,
+      balanceAfter: 0
+    };
+
+    state.transactions.push(tx);
+    recalculateAll();
+    saveState();
+
+    document.getElementById('txAmount').value = '';
+    document.getElementById('txDetails').value = '';
+    document.getElementById('txDate').value = '';
+    setDefaultTxDate();
+    renderAll();
+
+    openReceiptModal(tx.id);
+    if (window.AndroidBridge && state.settings.apkAutoOpenWa === '1') {
+      setTimeout(() => sendDirectToWhatsApp(), 300);
+    }
+  }
+
+  function deleteTransaction(txId) {
+    if (!confirm('هل تريد حذف هذه العملية؟ سيتم إعادة حساب رصيد العميل تلقائياً.')) return;
+    state.transactions = state.transactions.filter(t => t.id !== txId);
+    recalculateAll();
+    saveState();
+    renderAll();
+  }
+
+  function deleteCustomer(custId) {
+    if (!confirm('حذف العميل سيحذف جميع عملياته أيضاً، هل أنت متأكد؟')) return;
+    state.customers = state.customers.filter(c => c.id !== custId);
+    state.transactions = state.transactions.filter(t => t.customerId !== custId);
+    recalculateAll();
+    saveState();
+    renderAll();
+  }
+
+  function buildCaption(tx, cust) {
+    const voucherType = tx.type === 'debit' ? 'سند صرف (عليكم)' : 'سند قبض (لكم)';
+    const absBal = Math.abs(tx.balanceAfter);
+    const balLabel = tx.balanceAfter > 0
+      ? `إجمالي الرصيد عليكم: ${formatNumber(absBal)} ${tx.currency}`
+      : tx.balanceAfter < 0
+        ? `إجمالي الرصيد لكم: ${formatNumber(absBal)} ${tx.currency}`
+        : `الرصيد المتبقي: 0 ${tx.currency}`;
+
+    return `${voucherType} رقم: ${tx.receiptNo}\nالأخ: ${cust.name}\nالمبلغ: ${formatNumber(tx.amount)} ${tx.currency}\nالمبلغ كتابة: ${arabicNumberToWords(tx.amount, tx.currency)}\nوذلك مقابل: ${tx.details}\n${balLabel}\nالتاريخ: ${formatVoucherDate(tx.date)}`;
+  }
+
+  function openReceiptModal(txId) {
+    const tx = state.transactions.find(t => t.id === txId);
+    if (!tx) return;
+    const cust = state.customers.find(c => c.id === tx.customerId);
+    if (!cust) return;
+
+    activeReceiptTxId = txId;
+    const s = state.settings;
+
+    document.getElementById('rcStoreName').textContent = s.storeName || 'متجري';
+    document.getElementById('rcStorePhone').textContent = s.storePhone || '';
+    document.getElementById('rcStoreAddress').textContent = s.storeAddress || s.storeName || '';
+    document.getElementById('rcStorePhoneLeft').textContent = s.storePhone || '';
+
+    const logoBox = document.getElementById('rcLogoBox');
+    if (s.logoDataUrl) {
+      logoBox.innerHTML = `<img src="${s.logoDataUrl}" alt="logo" />`;
+    } else {
+      const ch = (s.storeName || 'س').trim().charAt(0);
+      logoBox.innerHTML = `<div class="vp-logo-fallback">${esc(ch)}</div>`;
+    }
+
+    const isDebit = tx.type === 'debit';
+    document.getElementById('rcVoucherTitle').textContent = isDebit ? 'سـنـد صـرف' : 'سـنـد قـبـض';
+    document.getElementById('rcNum').textContent = tx.receiptNo;
+    document.getElementById('rcDate').textContent = formatVoucherDate(tx.date);
+    document.getElementById('rcCustName').textContent = cust.name;
+    document.getElementById('rcTypeHeader').textContent = isDebit ? 'عليكم مبلغ' : 'لكم مبلغ';
+
+    const amtEl = document.getElementById('rcAmountVal');
+    amtEl.textContent = formatNumber(tx.amount);
+    amtEl.className = isDebit ? 'vp-amt-debit' : 'vp-amt-credit';
+
+    document.getElementById('rcCurrencyVal').textContent = tx.currency || 'يمني';
+    document.getElementById('rcAmountWords').textContent = arabicNumberToWords(tx.amount, tx.currency);
+    document.getElementById('rcDetails').textContent = tx.details;
+    document.getElementById('rcPrintDate').textContent = formatPrintDate(tx.date);
+
+    const balEl = document.getElementById('rcBalanceAfter');
+    const absBal = Math.abs(tx.balanceAfter);
+    if (tx.balanceAfter > 0) {
+      balEl.textContent = `${formatNumber(absBal)} ${tx.currency} (عليكم)`;
+      balEl.style.color = '#b91c1c';
+    } else if (tx.balanceAfter < 0) {
+      balEl.textContent = `${formatNumber(absBal)} ${tx.currency} (لكم)`;
+      balEl.style.color = '#047857';
+    } else {
+      balEl.textContent = `0 ${tx.currency} (متصفر)`;
+      balEl.style.color = '#111827';
+    }
+
+    document.getElementById('captionPreview').textContent = buildCaption(tx, cust);
+    const toast = document.getElementById('waStatusToast');
+    toast.className = 'status-toast';
+    toast.textContent = '';
+
+    document.getElementById('receiptModal').classList.add('open');
+  }
+
+  function closeReceiptModal() {
+    document.getElementById('receiptModal').classList.remove('open');
+  }
+
+  function setToast(type, msg) {
+    const toast = document.getElementById('waStatusToast');
+    toast.className = 'status-toast ' + type;
+    toast.textContent = msg;
+  }
+
+  function drawOfflineReceiptCanvas(tx, cust) {
+    const s = state.settings;
+    const c = document.createElement('canvas');
+    c.width = 900;
+    c.height = 660;
+    const ctx = c.getContext('2d');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, c.width, c.height);
+
+    // Header
+    ctx.fillStyle = '#1e3a8a';
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 26px Arial';
+    ctx.fillText(s.storeName || 'متجري', 865, 50);
+    ctx.fillText(s.storePhone || '', 865, 86);
+
+    ctx.textAlign = 'left';
+    ctx.fillText(s.storeAddress || s.storeName || '', 35, 50);
+    ctx.fillText(s.storePhone || '', 35, 86);
+
+    // Center Badge
+    ctx.strokeStyle = '#6b7280';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(330, 82, 240, 42);
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText(tx.type === 'debit' ? 'سـنـد صـرف' : 'سـنـد قـبـض', 450, 111);
+
+    // Table Top Grey Row
+    ctx.fillStyle = '#d1d5db';
+    ctx.fillRect(35, 140, 830, 52);
+    ctx.strokeRect(35, 140, 830, 52);
+    ctx.beginPath(); ctx.moveTo(450, 140); ctx.lineTo(450, 192); ctx.stroke();
+
+    ctx.fillStyle = '#1e3a8a';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText(`رقم السند : ${tx.receiptNo}`, 657, 175);
+    ctx.fillText(`التاريخ : ${formatVoucherDate(tx.date)}`, 242, 175);
+
+    // Row 2: Customer
+    ctx.strokeRect(35, 192, 830, 52);
+    ctx.beginPath();
+    ctx.moveTo(730, 192); ctx.lineTo(730, 244);
+    ctx.moveTo(210, 192); ctx.lineTo(210, 244);
+    ctx.stroke();
+    ctx.fillStyle = '#111827';
+    ctx.fillText('الأخ', 797, 227);
+    ctx.fillText('المحترم', 122, 227);
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillText(cust.name, 470, 227);
+
+    // Row 3: Amount Header
+    ctx.strokeRect(35, 244, 830, 50);
+    ctx.beginPath(); ctx.moveTo(450, 244); ctx.lineTo(450, 294); ctx.stroke();
+    ctx.fillStyle = '#1e3a8a';
+    ctx.fillText(tx.type === 'debit' ? 'عليكم مبلغ' : 'لكم مبلغ', 657, 277);
+    ctx.fillText('عملة الحساب', 242, 277);
+
+    // Row 4: Amount Value
+    ctx.strokeRect(35, 294, 830, 54);
+    ctx.beginPath(); ctx.moveTo(450, 294); ctx.lineTo(450, 348); ctx.stroke();
+    ctx.fillStyle = tx.type === 'debit' ? '#b91c1c' : '#047857';
+    ctx.font = 'bold 28px Arial';
+    ctx.fillText(formatNumber(tx.amount), 657, 330);
+    ctx.fillStyle = '#111827';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillText(tx.currency || 'يمني', 242, 330);
+
+    // Row 5: Words
+    ctx.strokeRect(35, 348, 830, 54);
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 22px Arial';
+    ctx.fillText(`المبلغ كتابة / ${arabicNumberToWords(tx.amount, tx.currency)}`, 850, 383);
+
+    // Row 6: Details
+    ctx.strokeRect(35, 402, 830, 54);
+    ctx.fillText(`وذلك مقابل / ${tx.details}`, 850, 437);
+
+    // Row 7: Balance
+    ctx.fillStyle = '#f9fafb';
+    ctx.fillRect(35, 456, 830, 54);
+    ctx.strokeRect(35, 456, 830, 54);
+    const absBal = Math.abs(tx.balanceAfter);
+    const balStr = tx.balanceAfter > 0 ? `${formatNumber(absBal)} ${tx.currency} (عليكم)`
+      : tx.balanceAfter < 0 ? `${formatNumber(absBal)} ${tx.currency} (لكم)` : `0 ${tx.currency} (متصفر)`;
+    ctx.fillStyle = tx.balanceAfter > 0 ? '#b91c1c' : '#047857';
+    ctx.fillText(`الرصيد بعد العملية / ${balStr}`, 850, 491);
+
+    // Footer
+    ctx.strokeStyle = '#d1d5db';
+    ctx.beginPath(); ctx.moveTo(35, 595); ctx.lineTo(865, 595); ctx.stroke();
+    ctx.fillStyle = '#374151';
+    ctx.font = '18px Arial';
+    ctx.textAlign = 'right'; ctx.fillText('تاريخ الطباعة', 865, 625);
+    ctx.textAlign = 'center'; ctx.fillText('1 / 1', 450, 625);
+    ctx.textAlign = 'left'; ctx.fillText(formatPrintDate(tx.date), 35, 625);
+
+    return c;
+  }
+
+  async function captureReceiptCanvas() {
+    if (typeof html2canvas === 'function') {
+      try {
+        const el = document.getElementById('receiptCapture');
+        return await html2canvas(el, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+      } catch (e) { console.log('html2canvas fallback:', e); }
+    }
+    const tx = state.transactions.find(t => t.id === activeReceiptTxId);
+    const cust = state.customers.find(c => c.id === tx.customerId);
+    return drawOfflineReceiptCanvas(tx, cust);
+  }
+
+  async function downloadReceiptImage() {
+    const tx = state.transactions.find(t => t.id === activeReceiptTxId);
+    if (!tx) return;
+    const canvas = await captureReceiptCanvas();
+    const dataUrl = canvas.toDataURL('image/png');
+    if (window.AndroidBridge && typeof window.AndroidBridge.saveFile === 'function') {
+      window.AndroidBridge.saveFile(`${tx.receiptNo}.png`, 'image/png', dataUrl.split(',')[1], true);
+      return;
+    }
+    const link = document.createElement('a');
+    link.download = `${tx.receiptNo}.png`;
+    link.href = dataUrl;
+    link.click();
+  }
+
+  function copyCaptionText() {
+    const text = document.getElementById('captionPreview').textContent;
+    navigator.clipboard.writeText(text).then(() => setToast('ok', 'تم نسخ نص الرسالة بنجاح'));
+  }
+
+  async function sendDirectToWhatsApp() {
+    const tx = state.transactions.find(t => t.id === activeReceiptTxId);
+    if (!tx) return;
+    const cust = state.customers.find(c => c.id === tx.customerId);
+    if (!cust) return;
+
+    const caption = buildCaption(tx, cust);
+    const phone = normalizePhone(cust.phone);
+    const canvas = await captureReceiptCanvas();
+    const dataUrl = canvas.toDataURL('image/png');
+
+    if (window.AndroidBridge && typeof window.AndroidBridge.sendToWhatsApp === 'function') {
+      window.AndroidBridge.sendToWhatsApp(
+        phone,
+        dataUrl.split(',')[1],
+        caption,
+        state.settings.waAppPackage || 'auto'
+      );
+      return;
+    }
+
+    try {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+      const file = new File([blob], `${tx.receiptNo}.png`, { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], text: caption });
+        return;
+      }
+    } catch (e) {}
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(caption)}`, '_blank');
+  }
+
+  function handleLogoUpload(event, previewBoxId) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const max = 180;
+        const scale = Math.min(max / img.width, max / img.height, 1);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        state.settings.logoDataUrl = canvas.toDataURL('image/png');
+        saveState();
+        renderHeader();
+        if (previewBoxId) {
+          document.getElementById(previewBoxId).innerHTML = `<img src="${state.settings.logoDataUrl}" alt="logo" />`;
+        } else {
+          alert('تم تحديث الشعار بنجاح');
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function saveSettings() {
+    const name = document.getElementById('setStoreName').value.trim();
+    if (!name) {
+      alert('الرجاء إدخال اسم المتجر');
+      return;
+    }
+    state.settings.isSetupDone = true;
+    state.settings.storeName = name;
+    state.settings.storePhone = document.getElementById('setStorePhone').value.trim();
+    state.settings.storeAddress = document.getElementById('setStoreAddress').value.trim();
+    state.settings.countryCode = document.getElementById('setCountryCode').value.trim() || '967';
+    state.settings.apkAutoOpenWa = document.getElementById('setApkAutoOpenWa').value;
+    state.settings.waAppPackage = document.getElementById('setWaAppPackage').value;
+
+    saveState();
+    renderHeader();
+    alert('تم حفظ الإعدادات بنجاح');
+  }
+
+  function populateSettingsForm() {
+    const s = state.settings;
+    document.getElementById('setStoreName').value = s.storeName || '';
+    document.getElementById('setStorePhone').value = s.storePhone || '';
+    document.getElementById('setStoreAddress').value = s.storeAddress || '';
+    document.getElementById('setCountryCode').value = s.countryCode || '967';
+    document.getElementById('setApkAutoOpenWa').value = s.apkAutoOpenWa || '1';
+    document.getElementById('setWaAppPackage').value = s.waAppPackage || 'auto';
+  }
+
+  function renderHeader() {
+    const s = state.settings;
+    document.getElementById('topStoreName').textContent = s.storeName || 'دفتر الديون';
+    document.getElementById('topStoreSub').textContent = [s.storePhone, s.storeAddress].filter(Boolean).join(' • ') || 'سجل متجرك الخاص';
+    const img = document.getElementById('topLogo');
+    if (s.logoDataUrl) {
+      img.src = s.logoDataUrl;
+      img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
+    }
+  }
+
+  function renderStats() {
+    const totalsDebit = {};
+    const totalsCredit = {};
+    state.customers.forEach(c => {
+      Object.entries(c.balances || {}).forEach(([cur, val]) => {
+        if (val > 0) totalsDebit[cur] = (totalsDebit[cur] || 0) + val;
+        else if (val < 0) totalsCredit[cur] = (totalsCredit[cur] || 0) + Math.abs(val);
+      });
+    });
+
+    const formatMap = (m) => Object.keys(m).length
+      ? Object.entries(m).map(([cur, v]) => `${formatNumber(v)} ${cur}`).join(' | ')
+      : '0';
+
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-label">إجمالي الديون (لك عند العملاء)</div>
+        <div class="stat-value text-danger">${esc(formatMap(totalsDebit))}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">إجمالي الأرصدة (للعملاء عندك)</div>
+        <div class="stat-value text-success">${esc(formatMap(totalsCredit))}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">عدد العملاء</div>
+        <div class="stat-value">${state.customers.length}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">عدد العمليات المسجلة</div>
+        <div class="stat-value">${state.transactions.length}</div>
+      </div>
+    `;
+  }
+
+  function renderCustomers() {
+    const query = (document.getElementById('searchCust').value || '').trim().toLowerCase();
+    const list = document.getElementById('customerList');
+    const filtered = state.customers.filter(c =>
+      c.name.toLowerCase().includes(query) || c.phone.includes(query)
+    );
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<div style="color:var(--muted); grid-column:1/-1; text-align:center; padding:24px;">لا يوجد عملاء حالياً. اضغط على "+ إضافة عميل جديد" للبدء.</div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(c => {
+      const entries = Object.entries(c.balances || {}).filter(([, v]) => v !== 0);
+      const chips = entries.length
+        ? entries.map(([cur, v]) => v > 0
+            ? `<span class="bal-chip debit">عليه: ${formatNumber(v)} ${esc(cur)}</span>`
+            : `<span class="bal-chip credit">له: ${formatNumber(Math.abs(v))} ${esc(cur)}</span>`
+          ).join('')
+        : `<span class="bal-chip">الرصيد: 0</span>`;
+
+      return `
+        <div class="customer-item">
+          <div class="customer-top">
+            <div>
+              <h3 class="customer-name">${esc(c.name)}</h3>
+              <div style="font-size:12px; color:var(--muted);" class="ltr">${esc(c.phone)}</div>
+            </div>
+            <span class="badge">${esc(c.category || 'عملاء')}</span>
+          </div>
+          <div class="balance-chips">${chips}</div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:auto;">
+            <button class="btn btn-danger btn-sm" style="flex:1;" onclick="openQuickTx('${esc(c.id)}','debit')">+ عليه</button>
+            <button class="btn btn-success btn-sm" style="flex:1;" onclick="openQuickTx('${esc(c.id)}','credit')">+ له</button>
+            <button class="btn btn-outline btn-sm" onclick="viewCustHistory('${esc(c.id)}')">كشف</button>
+            <button class="btn btn-outline btn-sm" onclick="deleteCustomer('${esc(c.id)}')">حذف</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderSelects() {
+    const txSel = document.getElementById('txCustomer');
+    const filterSel = document.getElementById('filterCustHistory');
+    const prevTx = txSel.value;
+    const prevFilter = filterSel.value;
+
+    const opts = state.customers.map(c => `<option value="${esc(c.id)}">${esc(c.name)} (${esc(c.phone)})</option>`).join('');
+    txSel.innerHTML = state.customers.length ? opts : '<option value="">أضف عميلاً أولاً</option>';
+    filterSel.innerHTML = '<option value="">كل العملاء</option>' + opts;
+
+    if (prevTx && state.customers.some(c => c.id === prevTx)) txSel.value = prevTx;
+    if (prevFilter && state.customers.some(c => c.id === prevFilter)) filterSel.value = prevFilter;
+  }
+
+  function viewCustHistory(custId) {
+    openTab('historyTab');
+    document.getElementById('filterCustHistory').value = custId;
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const filterId = document.getElementById('filterCustHistory').value;
+    const tbody = document.getElementById('historyBody');
+    const custMap = Object.fromEntries(state.customers.map(c => [c.id, c]));
+
+    const txs = [...state.transactions]
+      .filter(t => !filterId || t.customerId === filterId)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (!txs.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--muted); padding:20px;">لا توجد عمليات مسجلة</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = txs.map(t => {
+      const cust = custMap[t.customerId];
+      const typeTxt = t.type === 'debit'
+        ? '<span class="text-danger" style="font-weight:800;">سند صرف</span>'
+        : '<span class="text-success" style="font-weight:800;">سند قبض</span>';
+      const balTxt = t.balanceAfter > 0
+        ? `${formatNumber(t.balanceAfter)} ${esc(t.currency)} (عليه)`
+        : t.balanceAfter < 0
+          ? `${formatNumber(Math.abs(t.balanceAfter))} ${esc(t.currency)} (له)`
+          : `0 ${esc(t.currency)}`;
+
+      return `
+        <tr>
+          <td class="ltr">${esc(t.receiptNo)}</td>
+          <td>${esc(cust ? cust.name : 'محذوف')}</td>
+          <td>${typeTxt}</td>
+          <td style="font-weight:700;">${formatNumber(t.amount)} ${esc(t.currency)}</td>
+          <td>${esc(t.details)}</td>
+          <td>${balTxt}</td>
+          <td class="ltr">${esc(formatDateTime(t.date))}</td>
+          <td style="white-space:nowrap;">
+            <button class="btn btn-primary btn-sm" onclick="openReceiptModal('${esc(t.id)}')">السند / واتساب</button>
+            <button class="btn btn-outline btn-sm" onclick="deleteTransaction('${esc(t.id)}')">حذف</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function exportBackup() {
+    const json = JSON.stringify(state, null, 2);
+    const fname = `debts-backup-${new Date().toISOString().slice(0,10)}.json`;
+    if (window.AndroidBridge && typeof window.AndroidBridge.saveFile === 'function') {
+      window.AndroidBridge.saveFile(fname, 'application/json', json, false);
+      return;
+    }
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fname;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (!Array.isArray(parsed.customers) || !Array.isArray(parsed.transactions)) {
+          throw new Error('صيغة الملف غير صحيحة');
+        }
+        state = parsed;
+        if (state.settings && state.settings.storeName) state.settings.isSetupDone = true;
+        recalculateAll();
+        saveState();
+        populateSettingsForm();
+        renderAll();
+        alert('تم استيراد النسخة الاحتياطية بنجاح');
+      } catch (err) {
+        alert('خطأ في قراءة الملف: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function clearAllData() {
+    if (!confirm('تحذير: سيتم حذف جميع العملاء والديون نهائياً! هل أنت متأكد؟')) return;
+    state.customers = [];
+    state.transactions = [];
+    state.lastSeq = 0;
+    saveState();
+    renderAll();
+  }
+
+  function renderAll() {
+    renderHeader();
+    renderStats();
+    renderCustomers();
+    renderSelects();
+    renderHistory();
+  }
+
+  loadState();
+  populateSettingsForm();
+  renderAll();
+  checkInitialSetup();
+</script>
+</body>
+  </html>
