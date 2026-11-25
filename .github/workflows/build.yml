@@ -15,7 +15,8 @@ jobs:
       - name: Setup all Android files cleanly
         run: |
           mkdir -p /tmp/fix_src
-          find . -type f -name "index.html" -exec cp {} /tmp/fix_src/index.html \;
+          if [ -f app_v2.html ]; then cp app_v2.html /tmp/fix_src/index.html; else find . -type f -name "index.html" -exec cp {} /tmp/fix_src/index.html \; ; fi
+
           find . -not -path './.git/*' -not -path './app/build/*' -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) -exec cp {} /tmp/fix_src/raw_icon \;
           if [ ! -f /tmp/fix_src/index.html ]; then echo "ERROR: index.html not found"; exit 1; fi
           rm -rf app/src/main
